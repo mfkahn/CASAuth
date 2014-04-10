@@ -114,13 +114,31 @@ function casLogin($user, &$result) {
 
                         // If we are restricting users AND the user is not in
                         // the allowed users list, lets block the login
-                        if($CASAuth["RestrictUsers"]==true
-                           && !in_array($username,$CASAuth["AllowedUsers"]))
-                          {
+						$allowedUsers = $CASAuth["AllowedUsers"];
+						if ($CASAuth['RestrictUsers']) {
+							# if an array, make a Closure
+							if (is_array($allowedUsers)) {
+								$list = $allowedUsers;
+								$allowedUsers = function($username) use ($list) {
+									return in_array($username, $list);
+								};
+							}
+							else if (!($allowedUsers instanceof Closure)) {	
+								throw new MWException("RestictUsers is true but AllowedUsers is not an array or Closure");
+							}
+						}
+						else {
+							// allow all users
+							$allowedUsers = function($username) {
+								return true; // all users allowed
+							};
+						}	
+						# now evaluate the closure					
+                        if (!$allowedUsers($username)) {
                             // redirect user to the RestrictRedirect page
                             $wgOut->redirect($CASAuth["RestrictRedirect"]);
                             return true;
-                          }
+                        }
 
                         // Get MediaWiki user
                         $u = User::newFromName($username);    

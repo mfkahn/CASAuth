@@ -79,8 +79,18 @@ $CASAuth["RememberMe"]=true;
 # If $CASAuth["RestrictUsers"] is set to true, the list of users below are the
 # users that are allowed to login to the wiki.
 #
+# Note: this can be an array or something that is_callable() (like an anon function)
+# If the latter, the function must accept a username and return TRUE/FALSE
 # Default: $CASAuth["AllowedUsers"] = false;
 $CASAuth["AllowedUsers"] = false;
+
+# Example of anonymous function:
+#	// No homers
+#	$CASAuth["AllowedUsers"] = function($username) {
+#		return !preg_match("/^homer.*/i", $username);
+#	};
+#
+
 
 # If a user is not allowed to login, where should we redirect them to?
 #
